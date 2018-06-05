@@ -1,6 +1,8 @@
 import discord
-#!/usr/bin/python
 import praw
+import pdb
+import re
+import os
 
 reddit=praw.Reddit('bot1')
 
@@ -15,11 +17,29 @@ class Mycog:
         self.bot = bot
 
     @commands.command()
-    async def topReddit(self):
-        """This does stuff!"""
+    async def topSubmissions(self, *, subName):
+        """Get the top 5 hot posts for any subreddit"""
 
         #Your code will go here
-        await self.bot.say(submission.title)
+        subreddit = reddit.subreddit(subName);
+        for submission in subreddit.hot(limit=5):
+            await self.bot.say(submission.url)
+    @commands.command()      
+    async def wordSearch(self, subName, *, word):
+        """Count the # of times a word is said in a subreddit"""
+        #test
+        wordCount = 0
+               # cehck top 10
+        subreddit = reddit.subreddit(subName);    
+        for submission in subreddit.hot(limit=10):
+        
+                # do a case insensitive search
+                if re.search(word, submission.title, re.IGNORECASE):
+                    # increase counter
+                    wordCount += 1
+            
+                              #output word count
+        await self.bot.say(word + " is included in " + repr(wordCount) + " titles")
 
 
 def setup(bot):
