@@ -1,14 +1,22 @@
 import discord
+import urllib
+from bs4 import BeautifulSoup
+import requests
+import webbrowser
 import praw
 import pdb
 import re
 import os
+import datetime
+import asyncio
+import aiohttp
 from discord.ext import commands
 reddit=praw.Reddit('bot1')
 
 subreddit = reddit.subreddit("FortNiteBr")
 bot = commands.Bot(command_prefix='!', description='A bot that does random stuff')
 
+client = discord.Client()
 
 class Mycog:
     """My custom cog that does stuff!"""
@@ -43,7 +51,7 @@ class Mycog:
                               #output word count
         await self.bot.say(word + " is included in " + repr(wordCount) + " titles")
 
-    @commands.command()
+    @commands.command(pass_context = True)
     async def mastaIRL(self, ctx):
         """A picture demonstrating masta irl"""
         channel = ctx.message.channel
@@ -51,9 +59,9 @@ class Mycog:
             await self.bot.send_file(ctx, f)
        
     @commands.command()
-    async def greet(self):
+    async def greet(self, member: discord.Member):
         """Greets everyone!"""
-        await self.bot.say(":smiley: :wave: Hi senpai!")
+        await self.bot.say(":smiley: :wave: Hi {0.name} senpai!".format(member))
 
     @commands.command()
     async def about(self):
@@ -70,6 +78,46 @@ class Mycog:
         inviteLink = await self.bot.create_invite(destination = ctx.message.channel, xkcd = True, max_uses = 1)
         target_member = ctx.message.server.get_member_named(userToInvite)
         await self.bot.send_message(target_member, inviteLink)  
+    @commands.command()
+    async def role(self, member: discord.Member):
+        """Lists the roles of a certain user"""
+        await self.bot.say('{0.name} has roles {0.role}'.format(member))
+        
+     
+    @commands.command()
+    async def joined(self, member: discord.Member):
+        """Says when a member joined."""
+        await self.bot.say('{0.name} joined in {0.joined_at}'.format(member))
 
+    @commands.command(name='add', aliases=['plus'])
+    async def do_addition(self, first: int, second: int):
+        """Addition command"""
+        
+        total = first + second
+    
+        await self.bot.say(first + second)
+    @commands.command(pass_context = True)
+    async def roles(self, ctx):
+        """Displays all roles with IDS"""
+        roles = ctx.message.server.roles
+        result = "The roles are "
+        for role in roles:
+            result += role.name + ": " + role.id + ", "
+        await self.bot.say(result)
+   
+    @commands.command(pass_contex = True)
+    async def google(self, text):
+        """Googles something"""
+        text = urllib.parse.quote_plus(text)
+        
+        url = 'https://google.com/search?q=' + text
+        
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'lxml')
+        for g in soup.find_all(class_='g'):
+            await self.bot.say(g.text)
+    
+    
 def setup(bot):
-    bot.add_cog(Mycog(bot))
+    bot.add_cog(Mycog(bot))   
+
