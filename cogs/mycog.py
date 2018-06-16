@@ -1,5 +1,4 @@
 import discord
-import urllib
 from bs4 import BeautifulSoup
 import requests
 import webbrowser
@@ -116,7 +115,23 @@ class Mycog:
         soup = BeautifulSoup(response.text, 'lxml')
         for g in soup.find_all(class_='g'):
             await self.bot.say(g.text)
-    
+    @commands.command(pass_context = True)
+    async def weather(self):
+        """Get the weather"""
+        
+        page = requests.get("https://forecast.weather.gov/MapClick.php?lat=38.2492&lon=-122.0439#.WyR1zO4vyUk")
+        soup = BeautifulSoup(page.content, 'html.parser')
+        seven_day = soup.find(id="seven-day-forecast")
+        forecast_items = seven_day.find_all(class_="tombstone-container")
+        tonight = forecast_items[0]
+  
+        period = tonight.find(class_="period-name").get_text()
+        short_desc = tonight.find(class_="short-desc").get_text()
+        temp = tonight.find(class_="temp").get_text()
+        await self.bot.say(period)
+        await self.bot.say(short_desc)
+        await self.bot.say(temp)
+ 
     
 def setup(bot):
     bot.add_cog(Mycog(bot))   
