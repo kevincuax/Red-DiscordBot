@@ -5,6 +5,7 @@ import webbrowser
 import praw
 import pdb
 import re
+import urllib
 import os
 import datetime
 import asyncio
@@ -132,7 +133,16 @@ class Mycog:
         await self.bot.say(short_desc)
         await self.bot.say(temp)
  
-    
+    @commands.command(pass_context = True)
+    async def lyrics(self):
+        """Get lyrics of a song, to be completed"""
+        page = requests.get('https://genius.com/Supercell-my-dearest-lyrics')
+  
+        soup = BeautifulSoup(page.text, 'html.parser')
+        romaji = soup.find(class_='lyrics').get_text()
+        await self.bot.say(romaji)
+
+   
 def setup(bot):
     bot.add_cog(Mycog(bot))   
 
